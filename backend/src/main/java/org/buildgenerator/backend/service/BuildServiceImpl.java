@@ -9,6 +9,6 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-class BuildServiceImpl {
+public class BuildServiceImpl implements BuildService {
 
 }

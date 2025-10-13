@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/")
-class BuildController {
+public class BuildController {
 
 }
