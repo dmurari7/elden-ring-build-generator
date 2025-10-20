@@ -222,8 +222,6 @@ public class Build {
     * a build mainly uses magic based on whether it has a primary stat
     * of Intelligence or Faith.
     *
-    * @param:
-    *
     * @return: returns true if it has Int or Faith, and false if not
     * */
     public boolean isMagicBuild() {
@@ -234,8 +232,6 @@ public class Build {
      * @description: helper method used to help classify whether
      * a build mainly uses melee based on whether it has a primary stat
      * of Strength or Dexterity.
-     *
-     * @param:
      *
      * @return: returns true if it has Str or Dex, and false if not
      * */
