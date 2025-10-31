@@ -225,7 +225,8 @@ public class Build {
     * @return: returns true if it has Int or Faith, and false if not
     * */
     public boolean isMagicBuild() {
-        return primaryStats.contains("Intelligence") || primaryStats.contains("Faith");
+        return primaryStats != null &&
+                (primaryStats.contains("Intelligence") || primaryStats.contains("Faith"));
     }
 
     /*
@@ -236,6 +237,7 @@ public class Build {
      * @return: returns true if it has Str or Dex, and false if not
      * */
     public boolean isMeleeBuild() {
-        return primaryStats.contains("Strength") || primaryStats.contains("Dexterity");
+        return primaryStats != null &&
+                (primaryStats.contains("Strength") || primaryStats.contains("Dexterity"));
     }
 }
