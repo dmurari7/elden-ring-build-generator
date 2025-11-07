@@ -1,5 +1,6 @@
 package org.buildgenerator.backend.scraper;
 
+import org.buildgenerator.backend.cache.CacheService;
 import org.buildgenerator.backend.model.Build;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -34,29 +35,41 @@ public class BuildScraper {
     private static final Pattern STAT_PAIRS = Pattern.compile("(\\d{1,3})\\s+([A-Za-z]+)");
     private static final Pattern LEVEL_PATTERN = Pattern.compile("Level\\s*(\\d{1,3})", Pattern.CASE_INSENSITIVE);
 
-    public BuildScraper() {}
+    private final CacheService cacheService;
+
+    public BuildScraper(CacheService cacheService) {
+        this.cacheService = cacheService;
+    }
 
     /*
-     * @description: Scrape a single page and return all builds found on that page.
+     * @description: Scrape a single page for builds, but only if not already cached.
+     *               Saves the builds to the cache permanently on first scrape.
      *
-     * @param: url - URL of the page to scrape.
+     * @param: url - URL of the page to scrape (used as cache key).
      *
      * @return: List of Build objects parsed from the page.
      * @throws IOException if fetching the page fails.
      */
     public List<Build> scrapePageForBuilds(String url) throws IOException {
+        // Check if builds are already cached
+        Optional<List> cached = cacheService.read(url, List.class);
+        if (cached.isPresent()) {
+            logger.info("Loaded builds from cache for URL: {}", url);
+            return cached.get();
+        }
+
+        // If not cached, scrape the page
         Document doc = fetchDocumentWithRetries(url);
-        return parseBuildsFromDocument(doc);
+        List<Build> builds = parseBuildsFromDocument(doc);
+
+        // Write to cache permanently (we won’t overwrite)
+        cacheService.write(url, builds);
+
+        logger.info("Scraped and cached builds for URL: {}", url);
+        return builds;
     }
 
-    /*
-     * @description: Fetch Jsoup Document with retry logic.
-     *
-     * @param: url - URL to fetch.
-     *
-     * @return: Jsoup Document object.
-     * @throws IOException if fetching fails after retries.
-     */
+    // ----------------- Keep all your existing private methods unchanged -----------------
     private Document fetchDocumentWithRetries(String url) throws IOException {
         IOException lastEx = null;
         for (int attempt = 1; attempt <= DEFAULT_RETRIES; attempt++) {
@@ -86,7 +99,7 @@ public class BuildScraper {
      *
      * @return: List of Build objects.
      */
-    private List<Build> parseBuildsFromDocument(Document doc) {
+    List<Build> parseBuildsFromDocument(Document doc) {
         List<Build> builds = new ArrayList<>();
         Elements headers = doc.select("h3.bonfire");
 
